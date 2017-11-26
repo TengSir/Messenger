@@ -27,7 +27,8 @@ public class LoginFrame extends JFrame {
 	
 	//类需要用到的对象用has-a关系在类中定义，在合适的位置实例化
 	private Socket  client;
-
+	private ObjectOutputStream  out;
+	private  ObjectInputStream  in;
 	private JPanel contentPane;
 	private JPasswordField passwordField;
 	private JComboBox comboBox;
@@ -101,6 +102,8 @@ public class LoginFrame extends JFrame {
 							if(client==null)
 							{
 								client=new Socket(ServerFrameUIConfig.serverIP, ServerFrameUIConfig.serverPort);
+								  out=new ObjectOutputStream(client.getOutputStream());
+								    in=new ObjectInputStream(client.getInputStream());
 							}
 						} catch (Exception e1) {
 							e1.printStackTrace();
@@ -111,7 +114,7 @@ public class LoginFrame extends JFrame {
 						
 						try {
 							//消息要封装成对象，所以，要传递消息要用Object流
-							ObjectOutputStream  out=new ObjectOutputStream(client.getOutputStream());
+							
 							//因为我们将消息封装成特定的类型，所以，每次再给服务器发送消息时，都要封装成特定的消息对象才可以
 							
 							
@@ -125,7 +128,7 @@ public class LoginFrame extends JFrame {
 							out.flush();
 							
 							//当客户端把登陆消息发送出去后，应该立马读取服务器回发的登陆结果消息
-							ObjectInputStream  in=new ObjectInputStream(client.getInputStream());
+							
 							MessageBox  result=(MessageBox)in.readObject();
 							System.out.println(result);
 							if(result.getFrom()==null) {

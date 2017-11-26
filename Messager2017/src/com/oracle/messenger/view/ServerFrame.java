@@ -6,6 +6,8 @@ import java.awt.Panel;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -175,34 +177,12 @@ public class ServerFrame extends JFrame {
 						while(true)
 						{
 							Socket  c=server.accept();
-							System.out.println(c.getInetAddress());
-							
-							ObjectInputStream  in=new ObjectInputStream(c.getInputStream());
 							ObjectOutputStream  out=new ObjectOutputStream(c.getOutputStream());
-							try {
-								MessageBox  m=(MessageBox)in.readObject();//读取客户端发送过来的一个消息对象
-								if(m.getType().equals("login")) {
-									//链接数据库判断用户登陆信息是否正确
-									User loginedUser=DBOperator.login(m.getFrom().getUsername(), m.getFrom().getPassword());
-									
-									//当服务器根据传过来的用户名和密码查询完数据库之后，无论登陆成功还失败都要给用户回一个消息(都要封装成MessageBox)
-									
-									MessageBox  loginResult=new MessageBox();
-									loginResult.setFrom(loginedUser);
-									loginResult.setType("loginResult");
-									
-									out.writeObject(loginResult);
-									out.flush();
-									System.out.println("flush ok");
-									
-								}
-								
-								
-							} catch (ClassNotFoundException e1) {
-								e1.printStackTrace();
-							}
+							ObjectInputStream  in=new ObjectInputStream(c.getInputStream());
+							//应该在有一个客户端链接进来之后，我就开启一个线程，针对他单独和服务器通讯
 							
-							//some other  i/o  code 
+							ClientMessageReciveThread  thisClientThread=new ClientMessageReciveThread(out, in);
+							thisClientThread.start();//启动这个线程，让他独立运行
 						}
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -215,7 +195,45 @@ public class ServerFrame extends JFrame {
 				System.out.println("change");
 			}
 		}
+	}
+	//server  many  thread  service for  all  client 多线程针对多个客户端服务的这样服务模式
+	//定义一个独立的线程类，这个类处理某一个客户端和服务器的通讯
+	class ClientMessageReciveThread extends Thread{
+		private ObjectOutputStream  out;
+		private ObjectInputStream in;
 		
+		public ClientMessageReciveThread(ObjectOutputStream out, ObjectInputStream in) {
+			super();
+			this.out = out;
+			this.in = in;
+		}
+
+		//服务端的代码都在这里了，
+		@Override
+		public void run() {
+			try {
+				while(true)//不停的读取客户端发送过来的消息
+				{
+					MessageBox  m=(MessageBox)in.readObject();//当前这个线程接收到这个客户端发送过来的一个Message对象
+					
+					if(m.getType().equals("login")) {
+						//链接数据库判断用户登陆信息是否正确
+						User loginedUser=DBOperator.login(m.getFrom().getUsername(), m.getFrom().getPassword());
+						
+						//当服务器根据传过来的用户名和密码查询完数据库之后，无论登陆成功还失败都要给用户回一个消息(都要封装成MessageBox)
+						
+						MessageBox  loginResult=new MessageBox();
+						loginResult.setFrom(loginedUser);
+						loginResult.setType("loginResult");
+						out.writeObject(loginResult);
+						out.flush();
+					}
+				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			
+		}
 	}
 	
 }
