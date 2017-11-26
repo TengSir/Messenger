@@ -65,12 +65,12 @@ public class LoginFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		comboBox = new JComboBox();
+		comboBox = new JComboBox(new Object[] {"222","333","111"});
 		comboBox.setEditable(true);
 		comboBox.setBounds(66, 217, 178, 21);
 		contentPane.add(comboBox);
 		
-		passwordField = new JPasswordField();
+		passwordField = new JPasswordField("222");
 		passwordField.setBounds(66, 261, 178, 21);
 		contentPane.add(passwordField);
 		
@@ -94,7 +94,6 @@ public class LoginFrame extends JFrame {
 						return ;
 					}else
 					{
-						System.out.println("说明前面验证通过了执行到了这里");
 						//2.建立和服务器的链接(Socket链接)
 						
 						
@@ -130,15 +129,14 @@ public class LoginFrame extends JFrame {
 							//当客户端把登陆消息发送出去后，应该立马读取服务器回发的登陆结果消息
 							
 							MessageBox  result=(MessageBox)in.readObject();
-							System.out.println(result);
 							if(result.getFrom()==null) {
-								System.out.println("fail");
 								JOptionPane.showMessageDialog(LoginFrame.this, "登陆失败,请检查用户名和密码!","温馨提示",JOptionPane.ERROR_MESSAGE);
 							}else
 							{
-								System.out.println("success");
-								MainFrame  m=new MainFrame();
+								User u=result.getFrom();//登陸程序到的用戶資料，存儲在服務器給我發過來的消息裡面的From屬性裡面的
+								MainFrame  m=new MainFrame(u);
 								m.setVisible(true);
+								LoginFrame.this.setVisible(false);
 							}
 							
 							

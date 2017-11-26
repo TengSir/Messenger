@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
+
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -16,9 +17,12 @@ import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+
 import com.oracle.messenger.control.ClientFrameUIConfig;
+import com.oracle.messenger.model.User;
 
 public class MainFrame extends JFrame {
+	private User user;//定义一个User属性，用来接收登陆界面给我传过来查询数据库里面的用户对象
 
 	private JPanel contentPane;
 	private JLabel lblNewLabel;
@@ -31,26 +35,12 @@ public class MainFrame extends JFrame {
 	private JPanel panel;
 	private JTabbedPane tabbedPane;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					MainFrame frame = new MainFrame();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 	/**
 	 * Create the frame.
 	 */
-	public MainFrame() {
+	public MainFrame(User user) {
+		this.user=user;
 		setIconImage(Toolkit.getDefaultToolkit().getImage(LoginFrame.class.getResource("/com/sun/java/swing/plaf/windows/icons/Inform.gif")));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -62,15 +52,16 @@ public class MainFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		lblNewLabel = new JLabel("");
+		lblNewLabel = new JLabel();
 		lblNewLabel.setBorder(new LineBorder(new Color(128, 128, 128), 1, true));
 		lblNewLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setIcon(new ImageIcon(MainFrame.class.getResource("/com/sun/java/swing/plaf/windows/icons/Error.gif")));
+		System.out.println(user.getImagePath());
+		lblNewLabel.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().createImage(user.getImagePath())));
 		lblNewLabel.setBounds(10, 10, 88, 97);
 		contentPane.add(lblNewLabel);
 		
-		lblUsername = new JLabel("Username");
+		lblUsername = new JLabel(user.getNickname());
 		lblUsername.setBorder(new LineBorder(new Color(0, 0, 0)));
 		lblUsername.setBounds(129, 20, 100, 15);
 		contentPane.add(lblUsername);
@@ -78,7 +69,7 @@ public class MainFrame extends JFrame {
 		txtrAboutDescriptions = new JTextArea();
 		txtrAboutDescriptions.setEditable(false);
 		txtrAboutDescriptions.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
-		txtrAboutDescriptions.setText("about descriptions");
+		txtrAboutDescriptions.setText(user.getSignatrue());
 		txtrAboutDescriptions.setBounds(127, 52, 140, 49);
 		contentPane.add(txtrAboutDescriptions);
 		

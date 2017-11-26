@@ -217,23 +217,46 @@ public class ServerFrame extends JFrame {
 					MessageBox  m=(MessageBox)in.readObject();//当前这个线程接收到这个客户端发送过来的一个Message对象
 					
 					if(m.getType().equals("login")) {
-						//链接数据库判断用户登陆信息是否正确
-						User loginedUser=DBOperator.login(m.getFrom().getUsername(), m.getFrom().getPassword());
+						processLoginMessage(m);
+					}else if(m.getType().equals("register")) {
 						
-						//当服务器根据传过来的用户名和密码查询完数据库之后，无论登陆成功还失败都要给用户回一个消息(都要封装成MessageBox)
+					}else if(m.getType().equals("addFriend")) {
 						
-						MessageBox  loginResult=new MessageBox();
-						loginResult.setFrom(loginedUser);
-						loginResult.setType("loginResult");
-						out.writeObject(loginResult);
-						out.flush();
+					}else if(m.getType().equals("search")) {
+						
+					}else if(m.getType().equals("update")) {
+						
 					}
+					
+
 				}
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
-			
 		}
+		
+		/**
+		 * 定義一個處理登陸消息的方法
+		 * @param m
+		 */
+		private void processLoginMessage(MessageBox  m) {
+			//链接数据库判断用户登陆信息是否正确
+			User loginedUser=DBOperator.login(m.getFrom().getUsername(), m.getFrom().getPassword());
+			
+			//当服务器根据传过来的用户名和密码查询完数据库之后，无论登陆成功还失败都要给用户回一个消息(都要封装成MessageBox)
+			
+			MessageBox  loginResult=new MessageBox();
+			loginResult.setFrom(loginedUser);
+			loginResult.setType("loginResult");
+			try {
+				out.writeObject(loginResult);
+				out.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		
 	}
 	
 }
