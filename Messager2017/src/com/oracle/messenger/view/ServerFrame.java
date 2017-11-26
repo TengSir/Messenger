@@ -43,6 +43,7 @@ public class ServerFrame extends JFrame {
 	private JPanel contentPane;
 	private JScrollPane scrollPane;
 	private JLabel lblNewLabel;
+	private Object[] tableTitle=new Object[]{"登陆IP","用户昵称"};
 	private JTable table;
 	private TableModel  model;
 	private JScrollPane scrollPane_1;
@@ -100,7 +101,7 @@ public class ServerFrame extends JFrame {
 		lblNewLabel.setBounds(18, 21, 241, 15);
 		contentPane.add(lblNewLabel);
 		
-		model=new DefaultTableModel(new Object[]{"登陆IP","用户昵称"},0) ;
+		model=new DefaultTableModel(tableTitle,0) ;
 		table = new JTable(model);
 		scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(18, 48, 241, 296);
@@ -127,17 +128,18 @@ public class ServerFrame extends JFrame {
 		
 		button = new JButton("启动服务器");
 		button.addActionListener(listener);
-		button.setBounds(72, 21, 93, 23);
+		button.setBounds(49, 21, 116, 23);
 		panel_1.add(button);
 		
 		button_1 = new JButton("停止服务器");
+		button_1.setEnabled(false);
 		button_1.addActionListener(listener);
-		button_1.setBounds(196, 21, 93, 23);
+		button_1.setBounds(175, 21, 114, 23);
 		panel_1.add(button_1);
 		
 		button_2 = new JButton("断开所有用户");
 		button_2.addActionListener(listener);
-		button_2.setBounds(325, 21, 116, 23);
+		button_2.setBounds(316, 21, 125, 23);
 		panel_1.add(button_2);
 		
 		button_3 = new JButton("修改服务端端口");
@@ -173,24 +175,43 @@ public class ServerFrame extends JFrame {
 					try {
 						server=new ServerSocket(ServerFrameUIConfig.serverPort);
 						button.setEnabled(false);//设置启动按钮为不可用
-						//启动按钮除了要创建server对象之外，还要开启对外服务，accpet
-						while(true)
-						{
-							Socket  c=server.accept();
-							ObjectOutputStream  out=new ObjectOutputStream(c.getOutputStream());
-							ObjectInputStream  in=new ObjectInputStream(c.getInputStream());
-							//应该在有一个客户端链接进来之后，我就开启一个线程，针对他单独和服务器通讯
-							
-							ClientMessageReciveThread  thisClientThread=new ClientMessageReciveThread(out, in);
-							thisClientThread.start();//启动这个线程，让他独立运行
-						}
+						button_1.setEnabled(true);
+						JOptionPane.showMessageDialog(ServerFrame.this, "服务器启动成功!", "温馨提示", JOptionPane.INFORMATION_MESSAGE);
+						//启动按钮除了要创建server对象之外，还要开启对外服务，accpet,
+						new Thread() {
+							public void run() {
+								while(true)
+								{
+									try {
+										Socket  c=server.accept();
+										ObjectOutputStream  out=new ObjectOutputStream(c.getOutputStream());
+										ObjectInputStream  in=new ObjectInputStream(c.getInputStream());
+										//应该在有一个客户端链接进来之后，我就开启一个线程，针对他单独和服务器通讯
+										
+										ClientMessageReciveThread  thisClientThread=new ClientMessageReciveThread(out, in);
+										thisClientThread.start();//启动这个线程，让他独立运行
+									} catch (Exception e2) {
+									}
+								}
+							}
+						}.start();
 					} catch (IOException e1) {
 						e1.printStackTrace();
 						JOptionPane.showMessageDialog(ServerFrame.this, "啊奥，服务器启动失败!", "温馨提示", JOptionPane.ERROR_MESSAGE);
-						
 					}
 			}else if(e.getSource()==button_1) {
-				System.out.println("stop");
+				int n=JOptionPane.showConfirmDialog(ServerFrame.this, "您确认要关闭服务器吗?", "温馨提示", JOptionPane.OK_CANCEL_OPTION);
+				if(n==0)
+				{
+					try {
+						server.close();
+						button.setEnabled(true);
+						button_1.setEnabled(false);
+						JOptionPane.showMessageDialog(ServerFrame.this, "服务器已经关闭!", "温馨提示", JOptionPane.WARNING_MESSAGE);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}else if(e.getSource()==button_2) {
 				System.out.println("change");
 			}
@@ -243,8 +264,10 @@ public class ServerFrame extends JFrame {
 			//链接数据库判断用户登陆信息是否正确
 			User loginedUser=DBOperator.login(m.getFrom().getUsername(), m.getFrom().getPassword());
 			
+			//如果登陆成功，需要更新服务器窗口上显式的用户列表信息
+			model=new DefaultTableModel(new Object[][] {{loginedUser.getUsername(),loginedUser.getNickname()}}, tableTitle);
+			table.setModel(model);
 			//当服务器根据传过来的用户名和密码查询完数据库之后，无论登陆成功还失败都要给用户回一个消息(都要封装成MessageBox)
-			
 			MessageBox  loginResult=new MessageBox();
 			loginResult.setFrom(loginedUser);
 			loginResult.setType("loginResult");

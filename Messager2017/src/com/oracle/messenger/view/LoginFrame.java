@@ -136,6 +136,7 @@ public class LoginFrame extends JFrame {
 								User u=result.getFrom();//登陸程序到的用戶資料，存儲在服務器給我發過來的消息裡面的From屬性裡面的
 								MainFrame  m=new MainFrame(u);
 								m.setVisible(true);
+								com.sun.awt.AWTUtilities.setWindowOpacity(m, 0.9f);
 								LoginFrame.this.setVisible(false);
 							}
 							

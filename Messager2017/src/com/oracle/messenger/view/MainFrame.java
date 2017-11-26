@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Image;
 import java.awt.Toolkit;
 
 import javax.swing.ImageIcon;
@@ -23,7 +24,6 @@ import com.oracle.messenger.model.User;
 
 public class MainFrame extends JFrame {
 	private User user;//定义一个User属性，用来接收登陆界面给我传过来查询数据库里面的用户对象
-
 	private JPanel contentPane;
 	private JLabel lblNewLabel;
 	private JLabel lblUsername;
@@ -57,7 +57,7 @@ public class MainFrame extends JFrame {
 		lblNewLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		System.out.println(user.getImagePath());
-		lblNewLabel.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().createImage(user.getImagePath())));
+		lblNewLabel.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().createImage(user.getImagePath()).getScaledInstance(128, 128, Image.SCALE_DEFAULT)));
 		lblNewLabel.setBounds(10, 10, 88, 97);
 		contentPane.add(lblNewLabel);
 		
@@ -70,6 +70,7 @@ public class MainFrame extends JFrame {
 		txtrAboutDescriptions.setEditable(false);
 		txtrAboutDescriptions.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
 		txtrAboutDescriptions.setText(user.getSignatrue());
+		txtrAboutDescriptions.setLineWrap(true);
 		txtrAboutDescriptions.setBounds(127, 52, 140, 49);
 		contentPane.add(txtrAboutDescriptions);
 		
