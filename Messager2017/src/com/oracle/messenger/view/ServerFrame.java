@@ -182,6 +182,7 @@ public class ServerFrame extends JFrame {
 								{
 									try {
 										Socket  c=server.accept();
+										System.out.println(c.getInetAddress());
 										ObjectOutputStream  out=new ObjectOutputStream(c.getOutputStream());
 										ObjectInputStream  in=new ObjectInputStream(c.getInputStream());
 										//应该在有一个客户端链接进来之后，我就开启一个线程，针对他单独和服务器通讯

@@ -172,7 +172,7 @@ public class LoginFrame extends JFrame {
 					return ;
 				}
 				
-				RegisterFrame  r=new RegisterFrame(out,in);
+				RegisterFrame  r=new RegisterFrame(out,in,LoginFrame.this);
 				r.setVisible(true);
 				LoginFrame.this.setVisible(false);
 				

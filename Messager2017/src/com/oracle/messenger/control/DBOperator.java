@@ -91,6 +91,9 @@ public class DBOperator {
 		User  user1=new User("222","222","女",28,"老老王","只要锄头轮的好，有挖不到的墙角","resources/images/logo.jpg");
 		User  user2=new User("333","333","男",38,"姥姥老王","只要锄头轮的好，挖不到的墙角","resources/images/logo.jpg");
 		User  user3=new User("444","444","女",48,"老老老老王","只要锄头轮的好，的墙角","resources/images/logo.jpg");
+		User  user4=new User("123","123","男",18,"小王","只要锄头轮的好，的墙角啊","resources/images/logo.jpg");
+		User  user5=new User("234","234","男",28,"小王吧","只要锄头轮的好，的墙角玩儿","resources/images/logo.jpg");
+		User  user6=new User("345","345","女",58,"你是小王吧","只要锄头轮的好，的墙角是否放AA大","resources/images/logo.jpg");
 		
 		//给user用户封装一个好友列表信息
 		Map<String,HashSet<User>>  friends=new HashMap<>();
@@ -100,6 +103,17 @@ public class DBOperator {
 				f1s.add(user3);
 				
 				friends.put("大学室友", f1s);
+				
+				HashSet<User>  f2s=new HashSet<>();
+				f2s.add(user4);
+				f2s.add(user5);
+				
+				friends.put("大学损友", f2s);
+				
+				HashSet<User>  f3s=new HashSet<>();
+				f3s.add(user6);
+				
+				friends.put("暗恋的对象", f3s);
 				
 				user.setFriends(friends);
 				

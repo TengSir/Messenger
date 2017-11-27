@@ -33,6 +33,7 @@ public class RegisterFrame extends JFrame {
 	private Socket  client;
 	private ObjectOutputStream  out;
 	private  ObjectInputStream  in;
+	private LoginFrame  login;//has-a  
 	private JPanel contentPane;
 	private JTextField textField;
 	private JPasswordField passwordField;
@@ -57,7 +58,8 @@ public class RegisterFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public RegisterFrame(ObjectOutputStream  out, ObjectInputStream  in) {
+	public RegisterFrame(ObjectOutputStream  out, ObjectInputStream  in,LoginFrame  login) {
+		this.login=login;
 		this.out=out;
 		this.in=in;
 		setIconImage(Toolkit.getDefaultToolkit().getImage(LoginFrame.class.getResource("/com/sun/java/swing/plaf/windows/icons/Inform.gif")));
@@ -197,6 +199,14 @@ public class RegisterFrame extends JFrame {
 		contentPane.add(button);
 		
 		button_1 = new JButton("去登陆");
+		button_1.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				RegisterFrame.this.login.setVisible(true);
+				RegisterFrame.this.setVisible(false);
+				
+			}
+		});
 		button_1.setBounds(154, 623, 93, 23);
 		contentPane.add(button_1);
 	}
