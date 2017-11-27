@@ -155,6 +155,29 @@ public class LoginFrame extends JFrame {
 		contentPane.add(btnNewButton);
 		
 		btnNewButton_1 = new JButton("注册");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					if(client==null)
+					{
+						client=new Socket(ServerFrameUIConfig.serverIP, ServerFrameUIConfig.serverPort);
+						out=new ObjectOutputStream(client.getOutputStream());
+						in=new ObjectInputStream(client.getInputStream());
+					}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(LoginFrame.this, "无法连接服务器，请检查网络!","温馨提示",JOptionPane.ERROR_MESSAGE);
+					return ;
+				}
+				
+				RegisterFrame  r=new RegisterFrame(out,in);
+				r.setVisible(true);
+				LoginFrame.this.setVisible(false);
+				
+			}
+		});
 		btnNewButton_1.setBounds(158, 308, 66, 23);
 		contentPane.add(btnNewButton_1);
 	}
