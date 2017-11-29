@@ -65,12 +65,12 @@ public class LoginFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		comboBox = new JComboBox(new Object[] {"222","333","111"});
+		comboBox = new JComboBox(new Object[] {"111","333","222"});
 		comboBox.setEditable(true);
 		comboBox.setBounds(66, 217, 178, 21);
 		contentPane.add(comboBox);
 		
-		passwordField = new JPasswordField("222");
+		passwordField = new JPasswordField("111");
 		passwordField.setBounds(66, 261, 178, 21);
 		contentPane.add(passwordField);
 		
@@ -133,8 +133,9 @@ public class LoginFrame extends JFrame {
 								JOptionPane.showMessageDialog(LoginFrame.this, "登陆失败,请检查用户名和密码!","温馨提示",JOptionPane.ERROR_MESSAGE);
 							}else
 							{
+								
 								User u=result.getFrom();//登陸程序到的用戶資料，存儲在服務器給我發過來的消息裡面的From屬性裡面的
-								MainFrame  m=new MainFrame(u);
+								MainFrame  m=new MainFrame(u,in,out);
 								m.setVisible(true);
 								com.sun.awt.AWTUtilities.setWindowOpacity(m, 0.9f);
 								LoginFrame.this.setVisible(false);

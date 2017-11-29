@@ -7,6 +7,10 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -26,9 +30,19 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import com.oracle.messenger.control.ClientFrameUIConfig;
+import com.oracle.messenger.model.MessageBox;
 import com.oracle.messenger.model.User;
 
 public class MainFrame extends JFrame {
+	
+	//为了能记录所有和我聊过天的好友信息(打开过两天界面的好友信息)，我们定义一个集合存储这些资料
+	private Map<String,ChatFrame>  allFrames=new HashMap<>();
+	
+	//因为本项目要求一个用户在多个界面中共享一个socket建立的流(降低服务器的链接压力)
+	//所以，我们需要在本类定义一个ObjectIn,ObjectOut来接受登录界面已经建立好的两个流
+	private ObjectInputStream  in;
+	private ObjectOutputStream  out;
+	
 	private User user;//定义一个User属性，用来接收登陆界面给我传过来查询数据库里面的用户对象
 	private JPanel contentPane;
 	private JLabel lblNewLabel;
@@ -45,8 +59,11 @@ public class MainFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public MainFrame(User user) {
+	public MainFrame(User user,ObjectInputStream  in,ObjectOutputStream  out) {
+		this.in=in;
+		this.out=out;
 		this.user=user;
+		
 		setIconImage(Toolkit.getDefaultToolkit().getImage(LoginFrame.class.getResource("/com/sun/java/swing/plaf/windows/icons/Inform.gif")));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -97,7 +114,8 @@ public class MainFrame extends JFrame {
 			DefaultMutableTreeNode  group=new DefaultMutableTreeNode(groupName);//构造出每个组名的对应的TreeNode对象
 			HashSet<User>  friendsOfGroup=allFriends.get(groupName);
 			for(User u:friendsOfGroup) {
-				DefaultMutableTreeNode  friend=new DefaultMutableTreeNode(u.getNickname());
+				DefaultMutableTreeNode  friend=new DefaultMutableTreeNode(u.getNickname()+"["+u.getUsername()+"]");
+				
 				group.add(friend);
 			}
 			
@@ -117,9 +135,21 @@ public class MainFrame extends JFrame {
 					if(lastNode.isLeaf()) {
 						//上面是解析用户双击之后判断是不是双击的某一个用户名上的这个Node
 						String username=lastNode.toString();
-						System.out.println(username);
-						ChatFrame   chat=new ChatFrame();
+						String num=username.substring(username.lastIndexOf("[")+1,username.length()-1);
+						//
+						User your=new User();
+						your.setUsername(num);
+						for(String firendNum:allFrames.keySet())
+						{
+							if(firendNum.equals(num))
+							{
+								allFrames.get(firendNum).setVisible(true);
+								return;
+							}
+						}
+						ChatFrame   chat=new ChatFrame(MainFrame.this.user,your,MainFrame.this.in,MainFrame.this.out);
 						chat.setVisible(true);
+						allFrames.put(num, chat);
 					}
 				}
 			}
@@ -133,5 +163,58 @@ public class MainFrame extends JFrame {
 		
 		panel_2 = new JPanel();
 		tabbedPane.addTab("最近联系人", null, panel_2, null);
+		
+		//我们在主界面的构造器最后一行（构造器里面的代码是负责呈现界面的，也就数界面都显式完整了，我们可以让后台的那个线程悄悄开始工作了）
+
+		MessageReciverThread  t=new MessageReciverThread();
+		t.start();
+	}
+	
+	
+	//主界面这个类应该定义一个线程，该线程运行时创建一个线程实例，在主界面单独运行，用来时时刻刻接受"服务器"给我的消息
+	
+	class  MessageReciverThread  extends Thread{
+		@Override
+		public void run() {
+			MessageBox  recivedMessage=null;
+			try {
+				A:while((recivedMessage=(MessageBox)in.readObject())!=null) {
+						
+						for(String firendNum:allFrames.keySet())
+						{
+							if(firendNum.equals(recivedMessage.getFrom().getUsername()))
+							{
+								if(recivedMessage.getType().equals("shakeMessage"))
+								{
+									allFrames.get(firendNum).setVisible(true);
+									allFrames.get(firendNum).shakeWindow();
+									
+								}else
+								{
+									allFrames.get(firendNum).getTextArea().append(recivedMessage.getFrom().getNickname()+"  :  "+recivedMessage.getTime()+"\t\t\r\n"+recivedMessage.getContent()+"\r\n\r\n");
+									allFrames.get(firendNum).setVisible(true);
+								}
+								continue A;
+							}
+						}
+						ChatFrame  c=new ChatFrame(user,recivedMessage.getFrom() , in, out);
+						
+						if(recivedMessage.getType().equals("shakeMessage"))
+						{
+							c.setVisible(true);
+							c.shakeWindow();
+						}else
+						{
+							c.getTextArea().append(recivedMessage.getFrom().getNickname()+"  :  "+recivedMessage.getTime()+"\t\t\r\n"+recivedMessage.getContent()+"\r\n\r\n");
+							c.setVisible(true);
+						}
+						allFrames.put(recivedMessage.getFrom().getUsername(), c);
+				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

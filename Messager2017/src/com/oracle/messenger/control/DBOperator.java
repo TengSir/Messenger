@@ -118,6 +118,16 @@ public class DBOperator {
 				user.setFriends(friends);
 				
 				
+				
+				Map<String,HashSet<User>>  friends1=new HashMap<>();
+				HashSet<User>  f1s1=new HashSet<>();
+						f1s1.add(user);
+						f1s1.add(user3);
+						
+						friends1.put("好盆友", f1s1);
+						user4.setFriends(friends1);
+				
+				
 		try {
 			ObjectOutputStream  out=new ObjectOutputStream(new FileOutputStream("databases/"+user.getUsername()+".qq"));
 			out.writeObject(user);
@@ -136,6 +146,11 @@ public class DBOperator {
 			
 			out=new ObjectOutputStream(new FileOutputStream("databases/"+user3.getUsername()+".qq"));
 			out.writeObject(user3);
+			out.flush();
+			out.close();
+			
+			out=new ObjectOutputStream(new FileOutputStream("databases/"+user4.getUsername()+".qq"));
+			out.writeObject(user4);
 			out.flush();
 			out.close();
 		} catch (FileNotFoundException e) {

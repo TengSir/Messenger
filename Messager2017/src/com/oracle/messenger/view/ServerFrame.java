@@ -11,6 +11,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -32,6 +35,7 @@ import com.oracle.messenger.model.MessageBox;
 import com.oracle.messenger.model.User;
 
 public class ServerFrame extends JFrame {
+	private Map<String, ObjectOutputStream>  allClient=new HashMap<>();//记录每个客户端登陆的账号和它对应使用的输出流
 	
 	//封装，根据实际情况，我们为了编程的便利性，我们将UI和后台控制Socket的代码整合到这个一个类中，
 	
@@ -236,12 +240,13 @@ public class ServerFrame extends JFrame {
 				{
 					MessageBox  m=(MessageBox)in.readObject();//当前这个线程接收到这个客户端发送过来的一个Message对象
 					System.out.println(m);
+					
 					if(m.getType().equals("login")) {
 						processLoginMessage(m);
 					}else if(m.getType().equals("register")) {
 						processRegisterMessage(m);
-					}else if(m.getType().equals("addFriend")) {
-						
+					}else if(m.getType().equals("textMessage")|m.getType().equals("shakeMessage")) {
+						processTextMessage(m);
 					}else if(m.getType().equals("search")) {
 						
 					}else if(m.getType().equals("update")) {
@@ -253,6 +258,39 @@ public class ServerFrame extends JFrame {
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
+		}
+		/**
+		 * 处理普通转发的文本消息的方法
+		 * @param m
+		 */
+		private  void processTextMessage(MessageBox  m) {
+			//当服务器接收到这个用户发送过来的文本消息的时候，我们就要遍历那个全局的集合，找到这个消息接收方的对应的输出流，把消息写给他
+			for (String username:allClient.keySet()) {
+				
+				if(username.equals(m.getTo().getUsername())) {
+					m.setTime(new Date().toLocaleString());//在即将转发消息之前，将服务器上取到的时间设置到该消息对象里面，方便接收方显式正确的消息
+					try {
+						allClient.get(username).writeObject(m);
+						allClient.get(username).flush();
+						System.out.println("zhaodaole .xiechuqu ");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					break;
+				}
+			}
+			
+			/*//服务器再给消息发送方回发一个消息，把事件传递回去，让发送方可以显式正确的事件
+			MessageBox  timeMessage=new MessageBox();
+			timeMessage.setTime(new Date().toLocaleString());
+			try {
+				out.writeObject(timeMessage);
+				out.flush();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+			
 		}
 		/**
 		 * 这是处理注册消息的代码
@@ -284,6 +322,7 @@ public class ServerFrame extends JFrame {
 			User loginedUser=DBOperator.login(m.getFrom().getUsername(), m.getFrom().getPassword());
 			
 			if(loginedUser!=null) {
+				allClient.put(loginedUser.getUsername(), out);//在登陆成功后将该登陆的号码和对应的通讯流存储到服务器的这个全局集合里
 			//如果登陆成功，需要更新服务器窗口上显式的用户列表信息
 			model=new DefaultTableModel(new Object[][] {{loginedUser.getUsername(),loginedUser.getNickname()}}, tableTitle);
 			table.setModel(model);
