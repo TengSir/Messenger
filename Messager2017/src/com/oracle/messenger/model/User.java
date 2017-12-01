@@ -1,8 +1,10 @@
 package com.oracle.messenger.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class User implements Serializable{
 	private String username;
@@ -17,8 +19,22 @@ public class User implements Serializable{
 	private String nickname;
 	private String signatrue;
 	private String imagePath;
+	private Map<String,Set<User>>  myGroups=new  HashMap<>();//存储用户有哪些群的属性
 	
-	private Map<String,HashSet<User>>  friends;//has-a
+	
+	/**
+	 * @return the myGroups
+	 */
+	public Map<String, Set<User>> getMyGroups() {
+		return myGroups;
+	}
+	/**
+	 * @param myGroups the myGroups to set
+	 */
+	public void setMyGroups(Map<String, Set<User>> myGroups) {
+		this.myGroups = myGroups;
+	}
+	private Map<String,HashSet<User>>  friends=new HashMap<>();//has-a
 	
 	/**
 	 * @return the friends

@@ -1,5 +1,4 @@
 package com.oracle.messenger.view;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -51,7 +50,7 @@ public class MainFrame extends JFrame {
 	private JPanel panel_1;
 	private JPanel panel_2;
 	private JScrollPane scrollPane;
-	private JTree tree;
+	private JTree friendTree,groupTree;
 	private JPanel panel;
 	private JTabbedPane tabbedPane;
 
@@ -106,6 +105,10 @@ public class MainFrame extends JFrame {
 		
 		DefaultMutableTreeNode  root=new DefaultMutableTreeNode("root");//定义一个jtree根节点，所有的好友分组和好友都在这个根节点上往上放
 		
+		
+		/**
+		 * 解析用户里面的所有好友和分组信息，并生成到jtree上对吧
+		 */
 		Map<String, HashSet<User>>  allFriends=user.getFriends();
 		 
 		Set<String>  allGroupNames=allFriends.keySet();//获取所有的分组名
@@ -124,13 +127,12 @@ public class MainFrame extends JFrame {
  		
 		
 		
-		
-		tree = new JTree(root);
-		tree.addMouseListener(new MouseAdapter() {
+		friendTree = new JTree(root);
+		friendTree.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if(e.getButton()==1&&e.getClickCount()==2) {
-					TreePath  path=tree.getSelectionPath();
+					TreePath  path=friendTree.getSelectionPath();
 					DefaultMutableTreeNode lastNode=(DefaultMutableTreeNode)path.getLastPathComponent();
 					if(lastNode.isLeaf()) {
 						//上面是解析用户双击之后判断是不是双击的某一个用户名上的这个Node
@@ -154,11 +156,37 @@ public class MainFrame extends JFrame {
 				}
 			}
 		});
-		tree.setRootVisible(false);
-		scrollPane= new JScrollPane(tree);
+		friendTree.setRootVisible(false);
+		scrollPane= new JScrollPane(friendTree);
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
+		
+
+		/**
+		 * 解析该用户的所有群信息，并显式到jtree吧
+		 */
+		DefaultMutableTreeNode  root1=new DefaultMutableTreeNode("root");
+		
+		for(String groupName :user.getMyGroups().keySet())
+		{
+			DefaultMutableTreeNode  group=new DefaultMutableTreeNode(groupName);
+			root1.add(group);
+		}
+		groupTree=new JTree(root1);
+		groupTree.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount()==2&&e.getButton()==1) {
+					ChatFrame  c=new ChatFrame(MainFrame.this.user,groupTree.getSelectionPath().getLastPathComponent().toString(),MainFrame.this.in,MainFrame.this.out);
+					c.setVisible(true);
+				}
+			}
+		});
+		
+		groupTree.setRootVisible(false);
 		panel_1 = new JPanel();
+		panel_1.setLayout(new BorderLayout());
+		panel_1.add(groupTree);
 		tabbedPane.addTab("群组", null, panel_1, null);
 		
 		panel_2 = new JPanel();

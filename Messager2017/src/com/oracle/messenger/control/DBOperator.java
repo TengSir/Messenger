@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.oracle.messenger.model.User;
 //本项目数据库操作功能比较少，单一，基本都是对用户的操作，所以，我们就设计一个类
@@ -95,6 +96,26 @@ public class DBOperator {
 		User  user5=new User("234","234","男",28,"小王吧","只要锄头轮的好，的墙角玩儿","resources/images/logo.jpg");
 		User  user6=new User("345","345","女",58,"你是小王吧","只要锄头轮的好，的墙角是否放AA大","resources/images/logo.jpg");
 		
+		Map<String,Set<User>>  myGroups=new HashMap<>();
+		
+		Set<User>  qun1Friends=new HashSet<>();
+		
+		qun1Friends.add(user1);
+		qun1Friends.add(user2);
+		
+		myGroups.put("吹牛皮群",qun1Friends);
+		
+		
+		
+		Set<User>  qun2Friends=new HashSet<>();
+		
+		qun2Friends.add(user5);
+		qun2Friends.add(user6);
+		
+		myGroups.put("扯淡群",qun2Friends);
+		user.setMyGroups(myGroups);
+		
+		
 		//给user用户封装一个好友列表信息
 		Map<String,HashSet<User>>  friends=new HashMap<>();
 		HashSet<User>  f1s=new HashSet<>();
@@ -151,6 +172,14 @@ public class DBOperator {
 			
 			out=new ObjectOutputStream(new FileOutputStream("databases/"+user4.getUsername()+".qq"));
 			out.writeObject(user4);
+			out.flush();
+			out.close();
+			out=new ObjectOutputStream(new FileOutputStream("databases/"+user5.getUsername()+".qq"));
+			out.writeObject(user5);
+			out.flush();
+			out.close();
+			out=new ObjectOutputStream(new FileOutputStream("databases/"+user6.getUsername()+".qq"));
+			out.writeObject(user6);
 			out.flush();
 			out.close();
 		} catch (FileNotFoundException e) {

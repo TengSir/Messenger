@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -247,8 +248,8 @@ public class ServerFrame extends JFrame {
 						processRegisterMessage(m);
 					}else if(m.getType().equals("textMessage")|m.getType().equals("shakeMessage")) {
 						processTextMessage(m);
-					}else if(m.getType().equals("search")) {
-						
+					}else if(m.getType().equals("qunMessage")) {
+						processQunMessage(m);
 					}else if(m.getType().equals("update")) {
 						
 					}
@@ -259,6 +260,34 @@ public class ServerFrame extends JFrame {
 				e1.printStackTrace();
 			}
 		}
+		/**
+		 * 这是处理群消息的方法
+		 * @param m
+		 */
+		private void  processQunMessage(MessageBox  m) {
+		//1.先查出来，这个群有多少人
+			User u=DBOperator.login(m.getFrom().getUsername(), m.getFrom().getPassword());
+			Set<User>  thisGroupFriends=u.getMyGroups().get(m.getTo().getUsername());
+			for(User  uu:thisGroupFriends)
+			{
+				//当服务器接收到这个用户发送过来的文本消息的时候，我们就要遍历那个全局的集合，找到这个消息接收方的对应的输出流，把消息写给他
+				for (String username:allClient.keySet()) {
+					
+					if(username.equals(uu.getUsername())) {
+						m.setTime(new Date().toLocaleString());//在即将转发消息之前，将服务器上取到的时间设置到该消息对象里面，方便接收方显式正确的消息
+						try {
+							allClient.get(username).writeObject(m);
+							allClient.get(username).flush();
+							System.out.println("zhaodaole .这个群里面的一个好友，发送给他 ");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						break;
+					}
+				}
+			}
+		}
+		
 		/**
 		 * 处理普通转发的文本消息的方法
 		 * @param m

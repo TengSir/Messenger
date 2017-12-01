@@ -39,6 +39,7 @@ public class ChatFrame extends JFrame {
 	private JButton btnNewButton_1;
 	private JLabel lblNewLabel;
 	private JLabel lblNewLabel_1;
+	private String qunMing;
 
 	
 
@@ -48,18 +49,7 @@ public class ChatFrame extends JFrame {
 	public JTextArea getTextArea() {
 		return textArea;
 	}
-
-
-
-	/**
-	 * Create the frame.
-	 */
-	public ChatFrame(User my,User your,ObjectInputStream  in,ObjectOutputStream  out) {
-		this.in=in;
-		this.out=out;
-		this.my=my;
-		this.your=your;
-		
+	private ChatFrame() {
 		setBounds(100, 100, 784, 524);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -89,8 +79,18 @@ public class ChatFrame extends JFrame {
 				MessageBox  b=new MessageBox();
 				b.setContent(willSendMessage);
 				b.setFrom(ChatFrame.this.my);
-				b.setTo(ChatFrame.this.your);
-				b.setType("textMessage");
+				
+				if(ChatFrame.this.your==null)//判断是群聊窗口
+				{	String qunming;
+					User user=new User();
+					user.setUsername(qunMing);
+					b.setTo(user);
+					b.setType("qunMessage");
+				}else
+				{
+					b.setType("textMessage");
+					b.setTo(ChatFrame.this.your);
+				}
 				
 				//3.用从登录界面传过来的输出流写给服务器，让服务器帮我转发给我我的好友
 				try {
@@ -162,6 +162,28 @@ public class ChatFrame extends JFrame {
 		lblNewLabel_1.setBorder(BorderFactory.createLineBorder(Color.black));
 		lblNewLabel_1.setIcon(new ImageIcon(Toolkit.getDefaultToolkit().createImage("resources/images/self.jpg").getScaledInstance( 138, 183, Image.SCALE_DEFAULT)));
 		contentPane.add(lblNewLabel_1);
+	}
+
+
+	public ChatFrame(User my,String qunMing,ObjectInputStream  in,ObjectOutputStream  out) {
+		this();
+		this.in=in;
+		this.out=out;
+		this.my=my;
+		this.qunMing=qunMing;
+		this.setTitle(qunMing+"群聊中");
+	}
+	/**
+	 * Create the frame.
+	 */
+	public ChatFrame(User my,User your,ObjectInputStream  in,ObjectOutputStream  out) {
+		this();
+		this.in=in;
+		this.out=out;
+		this.my=my;
+		this.your=your;
+		
+		
 	}
 	
 	public void  shakeWindow() {
